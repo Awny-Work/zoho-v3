@@ -10,8 +10,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { AddEmployees, getEmployees } from "../../store/EmployeesSlice";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-import { classNames } from "primereact/utils";
+
 import { useFormik } from "formik";
+import { MdCloudUpload, MdFileDownload } from "react-icons/md";
+import { RiDeleteBin5Line } from "react-icons/ri";
 
 const EmployeeDash = () => {
   const dispatch = useDispatch();
@@ -28,23 +30,47 @@ const EmployeeDash = () => {
   const showSuccess = () => {
     toast.current.show({
       severity: "success",
-      summary: "Success",
       detail: "تم الحفظ بنجاح",
       life: 3000,
     });
   };
+  const EMptyInput = (mess) => {
+    toast.current.show({
+      severity: "error",
+      summary: `برجاء المحاولة بعد قليل`,
+      life: 3000,
+    });
+  };
 
-  const filters2 = {
+  // const filters2 = {
+  //   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  //   id: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  //   name: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  //   email: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  // };
+
+  const [filters2, setFilters2] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     id: { value: null, matchMode: FilterMatchMode.CONTAINS },
     name: { value: null, matchMode: FilterMatchMode.CONTAINS },
     email: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  });
+  const [globalFilterValue2, setGlobalFilterValue2] = useState("");
+
+  // Global tabel Filter
+  const onGlobalFilterChange2 = (e) => {
+    const value = e.target.value;
+    let _filters2 = { ...filters2 };
+    _filters2["global"].value = value;
+    setFilters2(_filters2);
+    setGlobalFilterValue2(value);
   };
 
   const formik = useFormik({
     initialValues: {
       guestName: "",
       guestEmail: "",
+      bankDetails: null,
     },
     validate: (data) => {
       let errors = {};
@@ -73,14 +99,8 @@ const EmployeeDash = () => {
             setVisible(false);
             formik.resetForm();
           })
-          .catch((err) => {
-            console.log(err);
-            // Object.keys(err).forEach((field) => {
-            //   // Iterate through the array of error messages for each field
-            //   err[field].forEach((errorMessage) => {
-            //     EMptyInput(errorMessage);
-            //   });
-            // });
+          .catch(() => {
+            EMptyInput();
           });
       }
     },
@@ -96,6 +116,21 @@ const EmployeeDash = () => {
     );
   };
 
+  const PaymentBody = (rowData) => (
+    <div className="StatusBtn6">
+      {rowData.bankURL && (
+        <button
+          className=" text-sm show_btn"
+          onClick={() => {
+            window.open(rowData.bankURL, "_blank");
+          }}
+        >
+          <MdFileDownload />
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div className="container-fluid">
       {/* <Navbar name={"ادارة الافراد"} /> */}
@@ -106,14 +141,30 @@ const EmployeeDash = () => {
       </div>
       <Toast ref={toast} /> <Toast ref={toastBC} position="bottom-center" />
       <div className="Tabel_container">
-        <div className="flex justify-content-between align-items-center  tabel_header">
-          <p>قائمة الضيوف</p>
-          <div className="StatusBtn ">
-            <button className=" add_btn" onClick={() => setVisible(true)}>
-              اضافة ضيف
-            </button>
+        <div className="grid justify-content-around align-items-center">
+          <div className="col-12 md:col-2">
+            <p>قائمة الضيوف</p>
+          </div>
+          <div className="col-12 md:col-6">
+            <span className="p-input-icon-left w-full">
+              <i className="pi pi-search" />
+              <InputText
+                value={globalFilterValue2}
+                onChange={onGlobalFilterChange2}
+                placeholder="بحث بشكل عام"
+                className="w-full"
+              />
+            </span>
+          </div>
+          <div className="col-12 md:col-2">
+            <div className="StatusBtn left_side">
+              <button className=" add_btn" onClick={() => setVisible(true)}>
+                اضافة ضيف
+              </button>
+            </div>
           </div>
         </div>
+
         <div className={styles.Tabel}>
           <DataTable
             tableStyle={{ minWidth: "50rem" }}
@@ -124,42 +175,30 @@ const EmployeeDash = () => {
             filters={filters2}
             filterDisplay="row"
             responsiveLayout="scroll"
-            globalFilterFields={["id", "email", "name"]}
             // header={header2}
             emptyMessage="  لا يوجد بيانات متاحة  "
           >
+            <Column field="id" header="#" style={{ maxWidth: "7rem" }} />
             <Column
-              filterField="id"
-              field="id"
-              header="#"
-              filter
-              filterPlaceholder="بحث"
-              style={{ maxWidth: "7rem" }}
-              showFilterMenu={false}
-            />
-            <Column
-              filterField="name"
               field="name"
               header=" الاسم "
-              filter
-              filterPlaceholder=" بحث "
               style={{ maxWidth: "7rem" }}
-              showFilterMenu={false}
             />
             <Column
-              filterField="email"
               field="email"
               header=" البريد الإلكتروني "
-              filter
-              filterPlaceholder=" بحث "
               style={{ maxWidth: "7rem" }}
-              showFilterMenu={false}
+            />
+            <Column
+              header="الاستمارة البنكية"
+              body={PaymentBody}
+              style={{ maxWidth: "7rem" }}
             />
           </DataTable>
 
           <Dialog
             visible={visible}
-            style={{ width: "50vw" }}
+            style={{ width: "70vw" }}
             onHide={() => {
               if (!visible) return;
               setVisible(false);
@@ -173,7 +212,7 @@ const EmployeeDash = () => {
                 <fieldset>
                   <legend>البيانات الاساسية</legend>
                   <div className="grid justify-content-between ">
-                    <div className="col-12 md:col-6">
+                    <div className="col-12 md:col-4">
                       <div className={`${styles2.inputFormik2}`}>
                         <div className={styles2.Signup_container}>
                           <label>
@@ -184,9 +223,6 @@ const EmployeeDash = () => {
                             placeholder=" الاسم"
                             id="guestName"
                             name="guestName"
-                            className={classNames({
-                              "p-invalid": isFormFieldInvalid("guestName"),
-                            })}
                             value={formik.values.guestName}
                             onChange={(e) => {
                               formik.setFieldValue("guestName", e.target.value);
@@ -196,7 +232,7 @@ const EmployeeDash = () => {
                         {getFormErrorMessage("guestName")}
                       </div>
                     </div>
-                    <div className="col-12 md:col-6">
+                    <div className="col-12 md:col-4">
                       <div className={`${styles2.inputFormik2}`}>
                         <div className={styles2.Signup_container}>
                           <label>
@@ -209,9 +245,6 @@ const EmployeeDash = () => {
                             placeholder=" البريد الالكتروني"
                             id="guestEmail"
                             name="guestEmail"
-                            className={classNames({
-                              "p-invalid": isFormFieldInvalid("guestEmail"),
-                            })}
                             value={formik.values.guestEmail}
                             onChange={(e) => {
                               formik.setFieldValue(
@@ -223,6 +256,46 @@ const EmployeeDash = () => {
                         </div>
                         {getFormErrorMessage("guestEmail")}
                       </div>
+                    </div>
+                    <div className="col-12 md:col-4">
+                      <div className="upload_img">
+                        <div className="div">
+                          <input
+                            name="bankDetails"
+                            id="bankDetails"
+                            type="file"
+                            // accept="application/pdf"
+                            onChange={(e) => {
+                              if (e.target.files.length > 0) {
+                                formik.setFieldValue(
+                                  "bankDetails",
+                                  e.target.files[0]
+                                );
+                              }
+                              e.target.value = null; // Reset file input value
+                            }}
+                          />
+                          <MdCloudUpload />
+                          <p className="p">إرفق الاستمارة البنكية </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-12 md:col-8"></div>
+                    <div className="col-12 md:col-4">
+                      {formik.values.bankDetails && (
+                        <div className="  div_   ">
+                          <span>{formik.values.bankDetails.name}</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              formik.setFieldValue("bankDetails", null)
+                            }
+                            className="btn_delete"
+                          >
+                            <RiDeleteBin5Line />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 

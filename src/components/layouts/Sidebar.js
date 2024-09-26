@@ -92,17 +92,15 @@ const Sidebar = ({ children }) => {
             style={{ display: isOpen ? "block" : "none" }}
             className="link_text"
           >
-            ورشة العمل
+            حلقات النقاش
           </div>
         </button>
         <button
           style={{
             justifyContent: isOpen ? "flex-start" : "center",
           }}
-          className={`link ${
-            locat.includes("/employees") ? "side_active" : ""
-          }`}
-          onClick={() => navigate("/employees")}
+          className={`link ${locat.includes("/geust") ? "side_active" : ""}`}
+          onClick={() => navigate("/geust")}
         >
           <div className="icon">
             <FaUserTie />
@@ -150,13 +148,13 @@ const Sidebar = ({ children }) => {
           </div>
         </NavLink>
       </div>
-      {locat.includes("/employees") && (
+      {locat.includes("/geust") && (
         <div className="sidebar-Links">
           <NavLink
             style={{
               justifyContent: isOpen ? "flex-start" : "center",
             }}
-            to={"/employees"}
+            to={"/geust"}
             className="sidebar-link"
           >
             <div className="icon">
@@ -187,7 +185,7 @@ const Sidebar = ({ children }) => {
               style={{ display: isOpen ? "block" : "none" }}
               className="link_text"
             >
-              قائمة ورش العمل
+              قائمة حلقات النقاش
             </div>
           </NavLink>
           <NavLink
@@ -204,7 +202,7 @@ const Sidebar = ({ children }) => {
               style={{ display: isOpen ? "block" : "none" }}
               className="link_text"
             >
-              اضافة ورش عمل
+              اضافة حلقة نقاش
             </div>
           </NavLink>
         </div>

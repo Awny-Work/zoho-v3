@@ -7,10 +7,16 @@ import { useState, useRef, useEffect } from "react";
 import { Toast } from "primereact/toast";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getEmployees, getWorkshop } from "../../store/EmployeesSlice";
+import {
+  getEmployees,
+  getWorkshop,
+  Workshopreminder,
+} from "../../store/EmployeesSlice";
 import { BsFilePdf } from "react-icons/bs";
 import { LuPencil } from "react-icons/lu";
-import { FaEye } from "react-icons/fa";
+import { InputText } from "primereact/inputtext";
+import { MdFileDownload } from "react-icons/md";
+import { RiAlarmWarningLine } from "react-icons/ri";
 
 const Workshop = () => {
   const navigate = useNavigate();
@@ -29,12 +35,37 @@ const Workshop = () => {
     }
   }, [dispatch, empolyeesArray]);
   const toast = useRef(null);
-  const toastBC = useRef(null);
-  const filters2 = {
+
+  const showSuccess = () => {
+    toast.current.show({
+      severity: "success",
+      detail: "تم الارسال بنجاح",
+      life: 3000,
+    });
+  };
+  const EMptyInput = (mess) => {
+    toast.current.show({
+      severity: "error",
+      summary: `برجاء المحاولة بعد قليل`,
+      life: 3000,
+    });
+  };
+  const [filters2, setFilters2] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     id: { value: null, matchMode: FilterMatchMode.CONTAINS },
     workshopname: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  });
+  const [globalFilterValue2, setGlobalFilterValue2] = useState("");
+
+  // Global tabel Filter
+  const onGlobalFilterChange2 = (e) => {
+    const value = e.target.value;
+    let _filters2 = { ...filters2 };
+    _filters2["global"].value = value;
+    setFilters2(_filters2);
+    setGlobalFilterValue2(value);
   };
+
   const PdfBody = (rowData) => (
     <a
       href={rowData.contractURL}
@@ -54,7 +85,7 @@ const Workshop = () => {
           window.open(rowData.paymentURL, "_blank");
         }}
       >
-        <FaEye />
+        <MdFileDownload />
       </button>
     </div>
   );
@@ -75,31 +106,69 @@ const Workshop = () => {
   };
   const gestBody = (rowData) => {
     return (
-      <p className=" text_status text_status_2">
+      <p className=" text_status  text_status_2">
         <span></span>{" "}
         {empolyeesArray?.find((ele) => ele.id === rowData.guestId)?.name}
       </p>
     );
   };
+  // ReminderBody
+  const ReminderBody = (rowData) => {
+    return (
+      <div className="StatusBtn6">
+        <button
+          className=" text-sm edite_btn"
+          onClick={() => {
+            dispatch(Workshopreminder(rowData.id))
+              .unwrap()
+              .then(() => {
+                showSuccess();
+              })
+              .catch((err) => {
+                EMptyInput();
+              });
+          }}
+        >
+          <RiAlarmWarningLine />
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="container-fluid">
       {/* <Navbar name={"ادارة الافراد"} /> */}
       <div className="cramp">
         <span className="icon-home"></span>{" "}
         <NavLink to={"/employees"}> لوحة التحكم </NavLink> <p> /</p>
-        <p> ادارة ورش العمل</p>
+        <p> ادارة حلقات النقاش</p>
       </div>
-      <Toast ref={toast} /> <Toast ref={toastBC} position="bottom-center" />
+      <Toast ref={toast} />
       <div className="Tabel_container">
-        <div className="flex justify-content-between align-items-center  tabel_header">
-          <p>قائمة ورش العمل</p>
-          <div className="StatusBtn ">
-            <button
-              className=" add_btn"
-              onClick={() => navigate("/add-wrokshop")}
-            >
-              اضافة ورشة عمل
-            </button>
+        <div className="grid justify-content-around align-items-center">
+          <div className="col-12 md:col-2">
+            <p>قائمة حلقات النقاش</p>
+          </div>
+          <div className="col-12 md:col-6">
+            <span className="p-input-icon-left w-full">
+              <i className="pi pi-search" />
+              <InputText
+                value={globalFilterValue2}
+                onChange={onGlobalFilterChange2}
+                placeholder="بحث بشكل عام"
+                className="w-full"
+              />
+            </span>
+          </div>
+          <div className="col-12 md:col-2">
+            <div className="StatusBtn left_side">
+              <button
+                className=" add_btn"
+                onClick={() => navigate("/add-wrokshop")}
+              >
+                اضافة حلقة نقاش
+              </button>
+            </div>
           </div>
         </div>
         <div className={styles.Tabel}>
@@ -112,32 +181,21 @@ const Workshop = () => {
             filters={filters2}
             filterDisplay="row"
             responsiveLayout="scroll"
-            globalFilterFields={["id", "workshopname"]}
+            // globalFilterFields={["id", "workshopname"]}
             // header={header2}
             emptyMessage="  لا يوجد بيانات متاحة  "
           >
+            <Column field="id" header="#" style={{ maxWidth: "7rem" }} />
             <Column
-              filterField="id"
-              field="id"
-              header="#"
-              filter
-              filterPlaceholder="بحث"
-              style={{ maxWidth: "7rem" }}
-              showFilterMenu={false}
-            />
-            <Column
-              filterField="workshopname"
               field="workshopname"
-              header=" اسم الورشة "
-              filter
-              filterPlaceholder=" بحث "
+              header="حلقة النقاش"
               style={{ maxWidth: "7rem" }}
-              showFilterMenu={false}
             />
             <Column
               field="workshopDate"
-              header=" تاريخ الورشة "
+              header=" التاريخ  "
               style={{ maxWidth: "7rem" }}
+              sortable
             />
             <Column
               body={gestBody}
@@ -147,17 +205,22 @@ const Workshop = () => {
             <Column
               header="العقد"
               body={PdfBody}
-              style={{ maxWidth: "12rem" }}
+              style={{ maxWidth: "7rem" }}
             />
             <Column
-              header="الدفع"
+              header="ايصال الدفع"
               body={PaymentBody}
-              style={{ maxWidth: "12rem" }}
+              style={{ maxWidth: "7rem" }}
+            />
+            <Column
+              header="تذكير"
+              body={ReminderBody}
+              style={{ maxWidth: "7rem" }}
             />
             <Column
               header="تعديل"
               body={StateBody}
-              style={{ maxWidth: "12rem" }}
+              style={{ maxWidth: "7rem" }}
             />
             {/* StateBody */}
           </DataTable>

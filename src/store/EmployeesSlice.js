@@ -34,7 +34,7 @@ export const AddEmployees = createAsyncThunk(
           headers: {
             Authorization: process.env.REACT_APP_AUTH,
             "X-Access-Token": Cookies.get("MangmentToken"),
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
             Accept: "application/json",
           },
         })
@@ -133,6 +133,31 @@ export const UpdateWorkshop = createAsyncThunk(
   }
 );
 
+export const Workshopreminder = createAsyncThunk(
+  "Employees/Workshopreminder",
+  async (id, thunkAPI) => {
+    const { rejectWithValue } = thunkAPI;
+    try {
+      const data = await axios
+        .get(
+          `${process.env.REACT_APP_BACKEND_API}dashboard/workshopreminder/${id}`,
+          {
+            headers: {
+              Authorization: process.env.REACT_APP_AUTH,
+              "X-Access-Token": Cookies.get("MangmentToken"),
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          }
+        )
+        .then((res) => res.data);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response.data.errors);
+    }
+  }
+);
+
 const EmployeesSlice = createSlice({
   name: "Employees",
   initialState: {
@@ -194,6 +219,16 @@ const EmployeesSlice = createSlice({
       state.isEmployeesLoading = false;
     },
     [getWorkshop_Id.rejected]: (state, action) => {
+      state.isEmployeesLoading = false;
+    },
+    // Workshopreminder
+    [Workshopreminder.pending]: (state, action) => {
+      state.isEmployeesLoading = true;
+    },
+    [Workshopreminder.fulfilled]: (state, action) => {
+      state.isEmployeesLoading = false;
+    },
+    [Workshopreminder.rejected]: (state, action) => {
       state.isEmployeesLoading = false;
     },
   },

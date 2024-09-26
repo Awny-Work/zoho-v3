@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "../../styles/Forms.module.css";
 import { useFormik } from "formik";
 import { MdCloudUpload } from "react-icons/md";
@@ -8,14 +8,36 @@ import { Dropdown } from "primereact/dropdown";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  AddEmployees,
   AddWorkshop,
   getEmployees,
   getWorkshop,
 } from "../../store/EmployeesSlice";
 import { NavLink, useNavigate } from "react-router-dom";
+import { Toast } from "primereact/toast";
+import { Dialog } from "primereact/dialog";
+
+import { IoMdAdd } from "react-icons/io";
+
 const AddWrorkShop = () => {
   const dispatch = useDispatch();
   const { empolyeesArray } = useSelector((state) => state.EmployeesSlice);
+  const toast = useRef(null);
+
+  const EMptyInput = (mess) => {
+    toast.current.show({
+      severity: "error",
+      summary: `برجاء المحاولة بعد قليل`,
+      life: 3000,
+    });
+  };
+  const showSuccess = () => {
+    toast.current.show({
+      severity: "success",
+      detail: "تم الحفظ بنجاح",
+      life: 3000,
+    });
+  };
   useEffect(() => {
     if (!empolyeesArray) {
       dispatch(getEmployees());
@@ -39,8 +61,6 @@ const AddWrorkShop = () => {
       if (!data.workshopname) errors.workshopname = "الاسم  مطلوب";
       if (!data.workshopDate) errors.workshopDate = " التاريخ مطلوب";
       if (!data.guestId) errors.guestId = " الضيف مطلوب";
-      if (!data.contract) errors.contract = " العقد مطلوب";
-      if (!data.payment) errors.payment = " ملف الدفع مطلوب";
       return errors;
     },
     onSubmit: (data, { resetForm }) => {
@@ -54,6 +74,9 @@ const AddWrorkShop = () => {
           dispatch(getWorkshop());
           resetForm();
           navigate("/wrokshop");
+        })
+        .catch(() => {
+          EMptyInput();
         });
     },
   });
@@ -67,14 +90,66 @@ const AddWrorkShop = () => {
       <small className="p-error">&nbsp;</small>
     );
   };
+  const [visible, setVisible] = useState(false);
 
+  const geustformik = useFormik({
+    initialValues: {
+      guestName: "",
+      guestEmail: "",
+      bankDetails: null,
+    },
+    validate: (data) => {
+      let errors = {};
+
+      if (!data.guestName) {
+        errors.guestName = "الاسم مطلوب";
+      }
+
+      if (!data.guestEmail) {
+        errors.guestEmail = "البريد الالكتروني  مطلوب";
+      } else if (
+        !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(data.guestEmail)
+      ) {
+        errors.guestEmail = "البريد الالكتروني غير صحيح";
+      }
+
+      return errors;
+    },
+    onSubmit: (data) => {
+      if (data) {
+        dispatch(AddEmployees(data))
+          .unwrap()
+          .then((res) => {
+            dispatch(getEmployees());
+            showSuccess();
+            setVisible(false);
+            geustformik.resetForm();
+          })
+          .catch(() => {
+            EMptyInput();
+          });
+      }
+    },
+  });
+
+  const isGeustFormFieldInvalid = (name) =>
+    !!(geustformik.touched[name] && geustformik.errors[name]);
+
+  const getgeustformikFormErrorMessage = (name) => {
+    return isGeustFormFieldInvalid(name) ? (
+      <small className="p-error">{geustformik.errors[name]}</small>
+    ) : (
+      <small className="p-error">&nbsp;</small>
+    );
+  };
   return (
     <div className="container-fluid">
+      <Toast ref={toast} />
       <div className="cramp">
         <span className="icon-home"></span>{" "}
         <NavLink to={"/employees"}> لوحة التحكم </NavLink> <p> /</p>
-        <NavLink to={"/wrokshop"}> ورش العمل </NavLink> <p> /</p>
-        <p> اضافة ورش عمل</p>
+        <NavLink to={"/wrokshop"}> حلقات النقاش </NavLink> <p> /</p>
+        <p> اضافة حخلقة نقاش</p>
       </div>
       <form
         onSubmit={formik.handleSubmit}
@@ -95,9 +170,6 @@ const AddWrorkShop = () => {
                       id="workshopname"
                       placeholder="اسم الورشة"
                       name="workshopname"
-                      // className={classNames({
-                      //   "p-invalid": isFormFieldInvalid("workshopname"),
-                      // })}
                       value={formik.values.workshopname}
                       onChange={(e) => {
                         formik.setFieldValue("workshopname", e.target.value);
@@ -125,29 +197,35 @@ const AddWrorkShop = () => {
                 </div>
               </div>
               <div className="col-12 md:col-3">
-                {empolyeesArray && (
-                  <div className={`${styles.inputFormik2}`}>
-                    <div className={styles.Signup_container}>
-                      <label htmlFor="guestId">
-                        {" "}
-                        الضيف <span className="req">*</span>
-                      </label>
-                      <Dropdown
-                        value={formik.values.guestId}
-                        onChange={(e) =>
-                          formik.setFieldValue("guestId", e.value)
-                        }
-                        options={empolyeesArray}
-                        optionLabel="name"
-                        // className={classNames({
-                        //   "p-invalid": isFormFieldInvalid("guestId"),
-                        // })}
-                        placeholder="اختر الضيف"
-                      />
+                <div className={`${styles.inputFormik2}`}>
+                  <div className={`${styles.Signup_container}`}>
+                    <label htmlFor="guestId">
+                      {" "}
+                      الضيف <span className="req">*</span>
+                    </label>
+                    <div className={"button_Addtext"}>
+                      {empolyeesArray && (
+                        <Dropdown
+                          value={formik.values.guestId}
+                          onChange={(e) =>
+                            formik.setFieldValue("guestId", e.value)
+                          }
+                          options={empolyeesArray}
+                          optionLabel="name"
+                          placeholder="اختر الضيف"
+                        />
+                      )}
+                      <button
+                        type="button"
+                        name="add"
+                        onClick={() => setVisible(true)}
+                      >
+                        <IoMdAdd />
+                      </button>
                     </div>
-                    {getFormErrorMessage("guestId")}
                   </div>
-                )}
+                  {getFormErrorMessage("guestId")}
+                </div>
               </div>
 
               <div className="col-12 md:col-3">
@@ -157,7 +235,7 @@ const AddWrorkShop = () => {
                       name="contract"
                       id="contract"
                       type="file"
-                      accept="application/pdf"
+                      // accept="application/pdf"
                       onChange={(e) => {
                         // Clear the input to allow re-selection of the same file
                         if (e.target.files.length > 0) {
@@ -167,10 +245,9 @@ const AddWrorkShop = () => {
                       }}
                     />
                     <MdCloudUpload />
-                    <p className="p">ارفق العقد (PDF)</p>
+                    <p className="p">إرفق العقد (PDF)</p>
                   </div>
                 </div>
-                {getFormErrorMessage("contract")}
               </div>
               <div className="col-12 md:col-3">
                 <div className="upload_img">
@@ -179,7 +256,7 @@ const AddWrorkShop = () => {
                       name="payment"
                       id="payment"
                       type="file"
-                      accept="application/pdf"
+                      // accept="application/pdf"
                       onChange={(e) => {
                         if (e.target.files.length > 0) {
                           formik.setFieldValue("payment", e.target.files[0]);
@@ -188,10 +265,9 @@ const AddWrorkShop = () => {
                       }}
                     />
                     <MdCloudUpload />
-                    <p className="p">ارفق ملف الدفع (PDF)</p>
+                    <p className="p">إرفق ايصال الدفع (PDF)</p>
                   </div>
                 </div>
-                {getFormErrorMessage("payment")}
               </div>
               <div className="col-12 md:col-3"></div>
               <div className="col-12 md:col-3"></div>
@@ -233,6 +309,121 @@ const AddWrorkShop = () => {
           </button>
         </div>
       </form>
+
+      <Dialog
+        visible={visible}
+        style={{ width: "70vw" }}
+        onHide={() => {
+          if (!visible) return;
+          setVisible(false);
+        }}
+      >
+        <form
+          name="addGeust"
+          onSubmit={geustformik.handleSubmit}
+          className={styles.Signup_form_container}
+        >
+          <div className={` bg_white ${styles.FormBody} mb-5 `}>
+            <fieldset>
+              <legend>البيانات الاساسية</legend>
+              <div className="grid justify-content-between ">
+                <div className="col-12 md:col-4">
+                  <div className={`${styles.inputFormik2}`}>
+                    <div className={styles.Signup_container}>
+                      <label>
+                        {" "}
+                        اسم الضيف <span className="req">*</span>{" "}
+                      </label>
+                      <InputText
+                        placeholder=" الاسم"
+                        id="guestName"
+                        name="guestName"
+                        value={geustformik.values.guestName}
+                        onChange={(e) => {
+                          geustformik.setFieldValue(
+                            "guestName",
+                            e.target.value
+                          );
+                        }}
+                      />
+                    </div>
+                    {getgeustformikFormErrorMessage("guestName")}
+                  </div>
+                </div>
+                <div className="col-12 md:col-4">
+                  <div className={`${styles.inputFormik2}`}>
+                    <div className={styles.Signup_container}>
+                      <label>
+                        {" "}
+                        البريد الالكتروني <span className="req">*</span>{" "}
+                      </label>
+                      <InputText
+                        placeholder=" البريد الالكتروني"
+                        id="guestEmail"
+                        name="guestEmail"
+                        value={geustformik.values.guestEmail}
+                        onChange={(e) => {
+                          geustformik.setFieldValue(
+                            "guestEmail",
+                            e.target.value
+                          );
+                        }}
+                      />
+                    </div>
+                    {getgeustformikFormErrorMessage("guestEmail")}
+                  </div>
+                </div>
+                <div className="col-12 md:col-4">
+                  <div className="upload_img">
+                    <div className="div">
+                      <input
+                        name="bankDetails"
+                        id="bankDetails"
+                        type="file"
+                        // accept="application/pdf"
+                        onChange={(e) => {
+                          if (e.target.files.length > 0) {
+                            geustformik.setFieldValue(
+                              "bankDetails",
+                              e.target.files[0]
+                            );
+                          }
+                          e.target.value = null; // Reset file input value
+                        }}
+                      />
+                      <MdCloudUpload />
+                      <p className="p">إرفق الاستمارة البنكية </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-12 md:col-8"></div>
+                <div className="col-12 md:col-4">
+                  {geustformik.values.bankDetails && (
+                    <div className="  div_   ">
+                      <span>{geustformik.values.bankDetails.name}</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          geustformik.setFieldValue("bankDetails", null)
+                        }
+                        className="btn_delete"
+                      >
+                        <RiDeleteBin5Line />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className={styles.next}>
+                <button name="addGeust" type="submit">
+                  حفظ
+                </button>
+              </div>
+            </fieldset>
+          </div>
+        </form>
+      </Dialog>
     </div>
   );
 };

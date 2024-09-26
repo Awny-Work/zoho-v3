@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getLogin } from "../../store/AuthSlice";
 import { useFormik } from "formik";
-import login from "../../images/login3.svg";
+import login from "../../images/login4.svg";
 // import login2 from "../../images/login2.svg";
 // import logo from "../../images/logo2.jpg";
 import { Password } from "primereact/password";
@@ -145,7 +145,7 @@ const Login = () => {
                       <img src={login} alt={"logo"} className="logo" />
                       {/* <h5>المصادقة متعددة العوامل لكل الحسابات</h5> */}
                       <p>
-                        في حالة واجهة مشكلة في عملية الدخول الرجاء التواصل مع
+                        في حالة مواجهة مشكلة في عملية الدخول الرجاء التواصل مع
                         الأدمن ezzat@interregional.com
                       </p>
                     </div>

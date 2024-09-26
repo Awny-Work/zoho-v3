@@ -25,7 +25,7 @@ function App() {
       <Suspense fallback={<Loader />}>
         <Routes>
           <Route element={<Protected />}>
-            <Route path="/employees" element={<EmployeeDash />} />
+            <Route path="/geust" element={<EmployeeDash />} />
             <Route path="/wrokshop" element={<Workshop />} />
             <Route path="/add-wrokshop" element={<AddWrorkShop />} />
             <Route path="/edite-wrokshop/:id" element={<EditeWrokShop />} />
