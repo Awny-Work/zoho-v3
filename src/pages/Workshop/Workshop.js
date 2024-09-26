@@ -106,10 +106,7 @@ const Workshop = () => {
   };
   const gestBody = (rowData) => {
     return (
-      <p className=" text_status  text_status_2">
-        <span></span>{" "}
-        {empolyeesArray?.find((ele) => ele.id === rowData.guestId)?.name}
-      </p>
+      <>{empolyeesArray?.find((ele) => ele.id === rowData.guestId)?.name}</>
     );
   };
   // ReminderBody

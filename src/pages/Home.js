@@ -72,10 +72,7 @@ const Home = () => {
 
   const gestBody = (rowData) => {
     return (
-      <p className=" text_status text_status_2">
-        <span></span>{" "}
-        {empolyeesArray?.find((ele) => ele.id === rowData.guestId)?.name}
-      </p>
+      <>{empolyeesArray?.find((ele) => ele.id === rowData.guestId)?.name}</>
     );
   };
 
@@ -130,16 +127,15 @@ const Home = () => {
 
             <div className={styles.Tabel}>
               <DataTable
-                value={workshopArray?.slice(-4)}
+                value={workshopArray?.slice(-5)}
                 className={`${styles.dataTabel}`}
-                rows={10}
+                rows={5}
                 dataKey="id"
-                filterDisplay="row"
                 responsiveLayout="scroll"
                 // header={header2}
                 emptyMessage="  لا يوجد بيانات متاحة  "
               >
-                <Column field="id" header="#" style={{ maxWidth: "3rem" }} />
+                <Column field="id" header="#" style={{ maxWidth: "1rem" }} />
                 <Column
                   field="workshopname"
                   header=" اسم الورشة "
@@ -154,7 +150,7 @@ const Home = () => {
                 <Column
                   body={gestBody}
                   header="  الضيف "
-                  style={{ maxWidth: "3rem" }}
+                  style={{ maxWidth: "4rem" }}
                 />
                 <Column
                   header="العقد"
@@ -166,11 +162,11 @@ const Home = () => {
                   body={PaymentBody}
                   style={{ maxWidth: "3rem" }}
                 />
-                <Column
+                {/* <Column
                   header="تذكير"
                   body={ReminderBody}
                   style={{ maxWidth: "1rem" }}
-                />
+                /> */}
               </DataTable>
             </div>
           </div>
@@ -181,11 +177,10 @@ const Home = () => {
             <div className={styles.Tabel}>
               <DataTable
                 // tableStyle={{ minWidth: "50rem" }}
-                value={empolyeesArray?.slice(-4)}
+                value={empolyeesArray?.slice(-5)}
                 className={`${styles.dataTabel}`}
-                rows={10}
+                rows={5}
                 dataKey="id"
-                filterDisplay="row"
                 responsiveLayout="scroll"
                 // header={header2}
                 emptyMessage="  لا يوجد بيانات متاحة  "

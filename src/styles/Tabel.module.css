@@ -9,7 +9,7 @@
 .Tabel th {
   text-align: center !important;
   font-size: 0.8125rem !important;
-
+  line-height: 3;
   /* cursor: pointer !important; */
 }
 .Tabel td {
