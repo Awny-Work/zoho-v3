@@ -361,7 +361,7 @@ const EditeWrokShop = () => {
                   </div>
                 )}
 
-                {Work_Id_Array && !formik.values.contract && (
+                {Work_Id_Array?.contractURL && !formik.values.contract && (
                   <div className="StatusBtn6">
                     <a
                       href={Work_Id_Array?.contractURL}
@@ -390,7 +390,7 @@ const EditeWrokShop = () => {
                   </div>
                 )}
 
-                {Work_Id_Array && !formik.values.payment && (
+                {Work_Id_Array?.paymentURL && !formik.values.payment && (
                   <div className="StatusBtn6">
                     <a
                       href={Work_Id_Array?.paymentURL}

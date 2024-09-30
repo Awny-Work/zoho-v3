@@ -54,6 +54,7 @@ const Workshop = () => {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     id: { value: null, matchMode: FilterMatchMode.CONTAINS },
     workshopname: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    workshopDate: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
   });
   const [globalFilterValue2, setGlobalFilterValue2] = useState("");
 
@@ -67,27 +68,35 @@ const Workshop = () => {
   };
 
   const PdfBody = (rowData) => (
-    <a
-      href={rowData.contractURL}
-      target="_blank"
-      download="file"
-      className="DownloadPdf"
-      rel="noreferrer"
-    >
-      <BsFilePdf />
-    </a>
+    <>
+      {rowData.contractURL && (
+        <a
+          href={rowData.contractURL}
+          target="_blank"
+          download="file"
+          className="DownloadPdf"
+          rel="noreferrer"
+        >
+          <BsFilePdf />
+        </a>
+      )}
+    </>
   );
   const PaymentBody = (rowData) => (
-    <div className="StatusBtn6">
-      <button
-        className=" text-sm show_btn"
-        onClick={() => {
-          window.open(rowData.paymentURL, "_blank");
-        }}
-      >
-        <MdFileDownload />
-      </button>
-    </div>
+    <>
+      {rowData.paymentURL && (
+        <div className="StatusBtn6">
+          <button
+            className=" text-sm show_btn"
+            onClick={() => {
+              window.open(rowData.paymentURL, "_blank");
+            }}
+          >
+            <MdFileDownload />
+          </button>
+        </div>
+      )}
+    </>
   );
 
   const StateBody = (rowData) => {

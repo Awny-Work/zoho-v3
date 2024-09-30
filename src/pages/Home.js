@@ -47,27 +47,35 @@ const Home = () => {
   }, [dispatch, workshopArray]);
   // const FilterEmpolyeesArray = empolyeesArray?.slice(5)
   const PdfBody = (rowData) => (
-    <a
-      href={rowData.contractURL}
-      target="_blank"
-      download="file"
-      className="DownloadPdf"
-      rel="noreferrer"
-    >
-      <BsFilePdf />
-    </a>
+    <>
+      {rowData.contractURL && (
+        <a
+          href={rowData.contractURL}
+          target="_blank"
+          download="file"
+          className="DownloadPdf"
+          rel="noreferrer"
+        >
+          <BsFilePdf />
+        </a>
+      )}
+    </>
   );
   const PaymentBody = (rowData) => (
-    <div className="StatusBtn6">
-      <button
-        className=" text-sm show_btn"
-        onClick={() => {
-          window.open(rowData.paymentURL, "_blank");
-        }}
-      >
-        <MdFileDownload />
-      </button>
-    </div>
+    <>
+      {rowData.paymentURL && (
+        <div className="StatusBtn6">
+          <button
+            className=" text-sm show_btn"
+            onClick={() => {
+              window.open(rowData.paymentURL, "_blank");
+            }}
+          >
+            <MdFileDownload />
+          </button>
+        </div>
+      )}
+    </>
   );
 
   const gestBody = (rowData) => {
